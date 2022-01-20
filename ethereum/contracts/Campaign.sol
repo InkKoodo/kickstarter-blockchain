@@ -90,10 +90,10 @@ contract Campaign {
 
     function cancelRequest(uint requestIndex) public onlyManager{
         Request storage request = requests[requestIndex];
-        //should has opened status
+        // should has opened status
         require(!request.closed);
 
-        //close active request
+        // close active request
         request.closed = true;
     }
 

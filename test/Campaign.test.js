@@ -46,14 +46,14 @@ describe('Campaigns', () => {
   it('marks caller as the campaign manager', async () => {
     const manager = await campaign.methods.manager().call();
     assert.equal(manager, accounts[0]);
-    console.log(campaign)
   })
 
   it('allows people to contribute to a contract, marks them as approvers', async () => {
     // call function to donate some money
     await campaign.methods.contribute().send({
       value: '200',
-      from: accounts[1]
+      from: accounts[1],
+      gas: '1000000'
     });
     // check if we are contributors now
     const isContributor = await campaign.methods.approvers(accounts[1]).call();
@@ -75,8 +75,9 @@ describe('Campaigns', () => {
 
   it('allows a manager to make a request', async () => {
     // create request
-    await campaign.methods.createRequest('Buy supplies', 100000, accounts[1]).send({
-      from: accounts[0]
+    await campaign.methods.createRequest('Buy supplies', 100, accounts[1]).send({
+      from: accounts[0],
+      gas: '1000000'
     });
     // make sure our request now is stored inside the contract
     const requests = await campaign.methods.requests(0).call(); // we pass into array "requests" params like () because it creates get function actually for this array and we use it to get our arr
@@ -86,14 +87,38 @@ describe('Campaigns', () => {
 
   // end-to-end testing
   it('processes requests', async () => {
-    // create a contract
-    // check if a manager is a creator of the contract
     // try to contribute into a project
-    // check if contributed account now exists inside contributors mapping
+    await campaign.methods.contribute().send({
+      value: web3.utils.toWei('10', 'ether'),
+      from: accounts[3],
+      gas: '1000000'
+    });
+
     // create a buying request
-    // vote for a particular request, approve it
+    await campaign.methods
+      .createRequest('Supplies', web3.utils.toWei('5', 'ether'), accounts[1])
+      .send({
+        from: accounts[0],
+        gas: '1000000'
+      });
+
+    // vote for a particular request, 
+    await campaign.methods.approveRequest(0).send({
+      from: accounts[3],
+      gas: '1000000'
+    })
+
     // finalize request
+    await campaign.methods.finalizeRequest(0).send({
+      from: accounts[0],
+      gas: '1000000'
+    })
+
     // check if the receiver actually get the money from the manager
+    const balanceInWei = await web3.eth.getBalance(accounts[1]);
+    let balanceInEth = await web3.utils.fromWei(balanceInWei, 'ether');
+    balanceInEth = parseFloat(balanceInEth);
+    assert(balanceInEth > 103)
   })
 });
 
@@ -104,8 +129,12 @@ describe('Campaigns', () => {
 // First we write down by comments all-all steps from every contract's start to the end
 // we need to do to create our e2e test (to see all important functions in process)
 
+// Inside e2e stays only key steps of the process 
+// (without checks if smth exists somewhere after action this checks will be done in separate tests)
+
 // WRITE ACTUAL CODE
 // We need to make sure our contracts are deployed properly. Usually it will be wrote inside beforeEach()
 // 
 
-// Check other functions that can be exists, but was not used when we were write our e2e test guide
+// Check other functions that can be exist, but was not used when we were write our initial e2e test guide
+
