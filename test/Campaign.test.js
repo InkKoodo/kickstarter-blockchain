@@ -20,9 +20,9 @@ beforeEach(async () => {
   factory = await new web3.eth.Contract(JSON.parse(compiledCampaignFactory.interface))
   .deploy({ data: compiledCampaignFactory.bytecode })
   .send({ from: accounts[0], gas: '3000000' })
-  
+
   // use factory methods
-  // create campaign 
+  // create campaign
   await factory.methods.createCampaign('100').send({
     from: accounts[0],
     gas: '3000000'
@@ -102,7 +102,7 @@ describe('Campaigns', () => {
         gas: '1000000'
       });
 
-    // vote for a particular request, 
+    // vote for a particular request,
     await campaign.methods.approveRequest(0).send({
       from: accounts[3],
       gas: '1000000'
@@ -125,16 +125,19 @@ describe('Campaigns', () => {
 
 // HOW TO THINK ABOUT TEST (my thoughts)
 
-// PREPARE 
-// First we write down by comments all-all steps from every contract's start to the end
+// PREPARE
+// We test one complete task with multiple steps ("make an order" for example. which include in itself multiple steps
+// of choose item, put it inside cart, proceed to checkout, etc.)
+
+// First we write down in comments all-all steps from every contract's start to the end
 // we need to do to create our e2e test (to see all important functions in process)
 
-// Inside e2e stays only key steps of the process 
+// Inside e2e stays only key steps of the process
 // (without checks if smth exists somewhere after action this checks will be done in separate tests)
 
 // WRITE ACTUAL CODE
 // We need to make sure our contracts are deployed properly. Usually it will be wrote inside beforeEach()
-// 
+//
 
 // Check other functions that can be exist, but was not used when we were write our initial e2e test guide
 
